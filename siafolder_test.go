@@ -11,7 +11,7 @@ import (
 	"github.com/NebulousLabs/Sia/api"
 )
 
-var testFiles = []string{"test", "testdir/testfile3.txt", "testdir/testdir2/testfile4.txt", "testfile1.txt", "testfile2.txt"}
+var testFiles = []string{"test/test", "test/testdir/testfile3.txt", "test/testdir/testdir2/testfile4.txt", "test/testfile1.txt", "test/testfile2.txt"}
 
 const testDir = "test"
 
@@ -96,7 +96,7 @@ func TestSiafolderCreateDelete(t *testing.T) {
 	// wait a bit for the filesystem event to propogate
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["newfile"]; !exists {
+	if _, exists := mockClient.siaFiles["test/newfile"]; !exists {
 		t.Fatal("newfile should have been uploaded when it was created on disk")
 	}
 
@@ -106,7 +106,7 @@ func TestSiafolderCreateDelete(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["newfile"]; exists {
+	if _, exists := mockClient.siaFiles["test/newfile"]; exists {
 		t.Fatal("newfile should have been deleted when it was removed on disk")
 	}
 
@@ -123,7 +123,7 @@ func TestSiafolderCreateDelete(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["testdir/newfile"]; !exists {
+	if _, exists := mockClient.siaFiles["test/testdir/newfile"]; !exists {
 		t.Fatal("newfile should have been uploaded when it was created on disk")
 	}
 
@@ -133,7 +133,7 @@ func TestSiafolderCreateDelete(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["testdir/newfile"]; exists {
+	if _, exists := mockClient.siaFiles["test/testdir/newfile"]; exists {
 		t.Fatal("newfile should have been deleted when it was removed on disk")
 	}
 }
@@ -158,7 +158,7 @@ func TestSiafolderCreateDirectory(t *testing.T) {
 	// should not upload empty directories
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["newdir"]; exists {
+	if _, exists := mockClient.siaFiles["test/newdir"]; exists {
 		t.Fatal("should not upload empty directories")
 	}
 
@@ -171,7 +171,7 @@ func TestSiafolderCreateDirectory(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	if _, exists := mockClient.siaFiles["newdir/testfile"]; !exists {
+	if _, exists := mockClient.siaFiles["test/newdir/testfile"]; !exists {
 		t.Fatal("should have uploaded file in newly created directory")
 	}
 }
@@ -199,7 +199,7 @@ func TestSiafolderFileWrite(t *testing.T) {
 	// wait a bit for the filesystem event to propogate
 	time.Sleep(time.Second)
 
-	oldChecksum, exists := mockClient.siaFiles["newfile"]
+	oldChecksum, exists := mockClient.siaFiles["test/newfile"]
 	if !exists {
 		t.Fatal("newfile should have been uploaded when it was created on disk")
 	}
@@ -212,7 +212,7 @@ func TestSiafolderFileWrite(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	newChecksum, exists := mockClient.siaFiles["newfile"]
+	newChecksum, exists := mockClient.siaFiles["test/newfile"]
 	if !exists {
 		t.Fatal("newfile did not exist after writing data to it")
 	}
