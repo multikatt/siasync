@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 
@@ -197,6 +198,16 @@ func (sf *SiaFolder) Close() error {
 	return sf.watcher.Close()
 }
 
+func addDir(base, file string) (string, error) {
+	lastdir := strings.LastIndex(base, "/")
+	dirname := base[lastdir+1:]
+	rel, err := filepath.Rel(base, file)
+	if err != nil {
+		return "", fmt.Errorf("error getting relative path to remove: %v\n", err)
+	}
+	return dirname + "/" + rel, nil
+}
+
 // handleCreate handles a file creation event. `file` is a relative path to the
 // file on disk.
 func (sf *SiaFolder) handleCreate(file string) error {
@@ -204,9 +215,9 @@ func (sf *SiaFolder) handleCreate(file string) error {
 	if err != nil {
 		return fmt.Errorf("error getting absolute path to upload: %v\n:", err)
 	}
-	relpath, err := filepath.Rel(sf.path, file)
+	relpath, err := addDir(sf.path, file)
 	if err != nil {
-		return fmt.Errorf("error getting relative path to upload: %v\n", err)
+		return fmt.Errorf("%v", err)
 	}
 	err = sf.client.Post(fmt.Sprintf("/renter/upload/%v", relpath), fmt.Sprintf("source=%v", abspath), nil)
 	if err != nil {
@@ -222,9 +233,9 @@ func (sf *SiaFolder) handleCreate(file string) error {
 
 // handleRemove handles a file removal event.
 func (sf *SiaFolder) handleRemove(file string) error {
-	relpath, err := filepath.Rel(sf.path, file)
+	relpath, err := addDir(sf.path, file)
 	if err != nil {
-		return fmt.Errorf("error getting relative path to remove: %v\n", err)
+		return fmt.Errorf("%v", err)
 	}
 	err = sf.client.Post(fmt.Sprintf("/renter/delete/%v", relpath), "", nil)
 	if err != nil {
@@ -244,9 +255,9 @@ func (sf *SiaFolder) uploadNonExisting() error {
 	}
 
 	for file := range sf.files {
-		relpath, err := filepath.Rel(sf.path, file)
+		relpath, err := addDir(sf.path, file)
 		if err != nil {
-			return err
+			return fmt.Errorf("%v", err)
 		}
 		exists := false
 		for _, siafile := range renterFiles.Files {
